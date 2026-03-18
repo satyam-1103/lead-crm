@@ -19,12 +19,14 @@ export default function Layout() {
   const page = pageTitles[location.pathname] || { title: 'LeadEstate CRM', subtitle: '' };
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="flex h-screen bg-slate-50/50 overflow-hidden font-sans">
       <Sidebar />
-      <div className="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 ml-64 flex flex-col h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-50/30 via-transparent to-transparent">
         <Topbar title={page.title} subtitle={page.subtitle} />
-        <main className="flex-1 overflow-y-auto p-6 animate-fade-in">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto p-8 animate-slide-up scroll-smooth">
+          <div className="max-w-[1600px] mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { firebaseService } from '../services/firebaseService';
 import type { Lead, LeadStatus } from '../types';
-import { IndianRupee, Home, Phone } from 'lucide-react';
+import { IndianRupee, Home, Phone, Plus } from 'lucide-react';
 import clsx from 'clsx';
 
 const COLUMNS: { id: LeadStatus; label: string; headerColor: string; headerBg: string; bodyBg: string }[] = [
@@ -70,29 +70,39 @@ export default function Pipeline() {
   }
 
   return (
-    <div className="h-full">
+    <div className="h-full space-y-8 animate-slide-up">
       {/* Summary Row */}
-      <div className="flex gap-3 mb-4 overflow-x-auto pb-1">
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide px-1">
         {COLUMNS.map(col => {
           const count = getByStatus(col.id).length;
           return (
-            <div key={col.id} className={clsx('border px-4 py-2.5 rounded-xl flex items-center gap-2.5 flex-shrink-0 bg-white', col.headerBg)}>
-              <span className={clsx('text-xl font-bold', col.headerColor)}>{count}</span>
-              <span className="text-xs text-slate-500">{col.label}</span>
+            <div key={col.id} className="card p-4 flex items-center gap-4 flex-shrink-0 min-w-[200px] border-none bg-white/50 backdrop-blur-sm shadow-soft-sm hover:shadow-soft-md transition-all duration-300">
+               <div className={clsx("w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-black shadow-inner", col.headerBg, col.headerColor)}>
+                {count}
+               </div>
+               <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">{col.label}</p>
+                <p className="text-xs font-semibold text-slate-700 mt-0.5">Active Leads</p>
+               </div>
             </div>
           );
         })}
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-3 overflow-x-auto pb-4" style={{ height: 'calc(100vh - 250px)' }}>
-          {COLUMNS.map(col => {
+        <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide" style={{ height: 'calc(100vh - 280px)' }}>
+          {COLUMNS.map((col, cIdx) => {
             const colLeads = getByStatus(col.id);
             return (
-              <div key={col.id} className="flex-shrink-0 w-64 flex flex-col">
-                <div className={clsx('px-3 py-2.5 rounded-t-xl border border-b-0 flex items-center justify-between', col.headerBg)}>
-                  <h3 className={clsx('text-xs font-semibold uppercase tracking-wider', col.headerColor)}>{col.label}</h3>
-                  <span className={clsx('text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center bg-white/70', col.headerColor)}>{colLeads.length}</span>
+              <div key={col.id} className="flex-shrink-0 w-80 flex flex-col group animate-fade-in" style={{ animationDelay: `${cIdx * 100}ms` }}>
+                <div className={clsx('px-5 py-4 rounded-t-2xl flex items-center justify-between border-b-2 bg-white/80 backdrop-blur-md sticky top-0 z-10', 
+                   col.id === 'New Lead' ? 'border-primary-500' : 
+                   col.id === 'Booked' ? 'border-emerald-500' : 'border-slate-200')}>
+                  <div className="flex items-center gap-2.5">
+                    <div className={clsx("w-2 h-2 rounded-full", col.id === 'New Lead' ? 'bg-primary-500' : col.id === 'Booked' ? 'bg-emerald-500' : 'bg-slate-300')}></div>
+                    <h3 className="text-xs font-black uppercase tracking-[0.15em] text-slate-900">{col.label}</h3>
+                  </div>
+                  <span className="text-[10px] font-black w-6 h-6 rounded-lg flex items-center justify-center bg-slate-100 text-slate-500">{colLeads.length}</span>
                 </div>
 
                 <Droppable droppableId={col.id}>
@@ -101,9 +111,8 @@ export default function Pipeline() {
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                       className={clsx(
-                        'flex-1 overflow-y-auto space-y-2 p-2 rounded-b-xl border transition-colors duration-200',
-                        col.bodyBg,
-                        snapshot.isDraggingOver && 'border-primary-300 bg-primary-50/60'
+                        'flex-1 overflow-y-auto space-y-4 p-4 rounded-b-2xl transition-all duration-500 scrollbar-hide',
+                        snapshot.isDraggingOver ? 'bg-slate-100/50 ring-1 ring-inset ring-slate-200' : 'bg-slate-50/30'
                       )}
                     >
                       {colLeads.map((lead, index) => (
@@ -114,32 +123,37 @@ export default function Pipeline() {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className={clsx(
-                                'bg-white border border-slate-200 rounded-xl p-3 space-y-2.5',
-                                'hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-grab active:cursor-grabbing',
-                                snapshot.isDragging && 'shadow-xl rotate-1 scale-105 border-primary-300'
+                                'card-premium p-5 space-y-4 border-none bg-white shadow-soft-md select-none group/card',
+                                snapshot.isDragging ? 'shadow-premium ring-2 ring-primary-500 rotate-2 scale-105 z-50' : 'hover:-translate-y-1'
                               )}
                             >
-                              <div className="flex items-start justify-between gap-2">
-                                <p className="text-sm font-semibold text-slate-700 leading-tight">{lead.name}</p>
-                                <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded flex-shrink-0">{lead.id}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                                <Home className="w-3 h-3 flex-shrink-0" />
-                                <span>{lead.propertyInterest}</span>
-                                <span>·</span>
-                                <IndianRupee className="w-3 h-3 flex-shrink-0" />
-                                <span className="text-slate-500">{formatBudget(lead.budgetMin, lead.budgetMax)}</span>
-                              </div>
-                              <div className="text-xs text-slate-400 truncate">{lead.source} · {lead.preferredLocation}</div>
-                              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                                <div className="flex items-center gap-1.5">
-                                  <div className={clsx('w-5 h-5 rounded-full bg-gradient-to-br flex items-center justify-center text-[8px] font-bold text-white', AGENT_COLORS[lead.assignedAgent] || 'from-slate-400 to-slate-500')}>
-                                    {AGENT_INITIALS[lead.assignedAgent] || '??'}
+                              <div className="space-y-1">
+                                <div className="flex items-start justify-between">
+                                  <p className="text-sm font-bold text-slate-900 leading-tight group-hover/card:text-primary-600 transition-colors">{lead.name}</p>
+                                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-[9px] font-black text-slate-400 opacity-50">
+                                    {lead.id.slice(0, 2)}
                                   </div>
-                                  <span className="text-[10px] text-slate-400 truncate max-w-[80px]">{lead.assignedAgent}</span>
                                 </div>
-                                <button className="text-slate-400 hover:text-primary-600 transition-colors">
-                                  <Phone className="w-3 h-3" />
+                                <div className="flex items-center gap-2">
+                                  <div className="flex -space-x-1.5 overflow-hidden">
+                                     <div className={clsx('w-5 h-5 rounded-full border border-white ring-2 ring-white bg-gradient-to-br flex items-center justify-center text-[7px] font-black text-white', AGENT_COLORS[lead.assignedAgent] || 'from-slate-400 to-slate-500')}>
+                                      {AGENT_INITIALS[lead.assignedAgent] || '??'}
+                                     </div>
+                                  </div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{lead.source}</p>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-wrap gap-1.5">
+                                <span className="badge bg-slate-50 text-slate-600 border-slate-100 text-[9px] tracking-normal py-1 pr-2">
+                                  <Home className="w-3 h-3 mr-1 text-slate-400" /> {lead.propertyInterest}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                <p className="text-xs font-black text-slate-900">{formatBudget(lead.budgetMin, lead.budgetMax)}</p>
+                                <button className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-sm">
+                                  <Phone className="w-3.5 h-3.5" />
                                 </button>
                               </div>
                             </div>
@@ -148,7 +162,12 @@ export default function Pipeline() {
                       ))}
                       {provided.placeholder}
                       {colLeads.length === 0 && (
-                        <div className="text-center py-8 text-slate-300 text-xs">Drop leads here</div>
+                        <div className="h-32 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 opacity-50 mt-4 group-hover:opacity-100 transition-opacity">
+                           <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                              <Plus className="w-4 h-4 text-slate-400" />
+                           </div>
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No Leads</p>
+                        </div>
                       )}
                     </div>
                   )}

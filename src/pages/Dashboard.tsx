@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import { Users, TrendingUp, MapPin, CheckCircle, Percent, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import clsx from 'clsx';
 import { firebaseService } from '../services/firebaseService';
 import type { Lead } from '../types';
 import { leadsSourceData, salesFunnelData, weeklyLeadData } from '../data/mockData';
@@ -63,83 +64,104 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div className="space-y-8 animate-slide-up">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
         {dynamicStats.map(({ label, value, change, up, icon: Icon, color, bg }) => (
-          <div key={label} className="stat-card col-span-1">
-            <div className="flex items-start justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center`}>
-                <Icon className={`w-5 h-5 ${color}`} />
+          <div key={label} className="stat-card group">
+            <div className="flex items-start justify-between mb-4">
+              <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                <Icon className={`w-6 h-6 ${color}`} />
               </div>
-              <span className={`text-xs font-semibold flex items-center gap-0.5 ${up ? 'text-emerald-600' : 'text-red-500'}`}>
+              <div className={clsx(
+                "px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-colors",
+                up ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+              )}>
                 {up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                 {change}
-              </span>
+              </div>
             </div>
-            <p className="text-2xl font-bold text-slate-800">{value}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+            <div className="space-y-1">
+              <p className="text-3xl font-black text-slate-900 tracking-tight">{value}</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+            </div>
+            <div className="mt-4 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div 
+                className={clsx("h-full rounded-full transition-all duration-1000 delay-300", 
+                  label === 'Bookings' ? 'bg-emerald-500 w-[65%]' : 
+                  label === 'Total Leads' ? 'bg-primary-500 w-[80%]' : 'bg-slate-300 w-[40%]'
+                )}
+              ></div>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Weekly Lead Growth */}
-        <div className="card p-5 col-span-2">
-          <div className="flex items-center justify-between mb-4">
+        <div className="card-premium p-7 col-span-2">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="text-sm font-semibold text-slate-800">Weekly Lead Growth</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Leads received vs converted over 8 weeks</p>
+              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Weekly Lead Growth</h3>
+              <p className="text-sm font-medium text-slate-500 mt-1">Growth analytics for the last 8 weeks</p>
             </div>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5 text-slate-600"><span className="w-2 h-2 rounded-full bg-primary-500"></span>Leads</span>
-              <span className="flex items-center gap-1.5 text-slate-500"><span className="w-2 h-2 rounded-full bg-emerald-500"></span>Converted</span>
+            <div className="flex items-center gap-4 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
+              <button className="px-4 py-1.5 rounded-lg bg-white shadow-sm text-xs font-bold text-primary-600">Leads</button>
+              <button className="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-700">Earnings</button>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={weeklyLeadData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={weeklyLeadData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="leadsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#0e8ce9" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#0e8ce9" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="convertedGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="week" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="week" tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} dy={10} />
+              <YAxis tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} dx={-10} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="leads" name="Leads" stroke="#0ea5e9" strokeWidth={2} fill="url(#leadsGrad)" />
-              <Area type="monotone" dataKey="converted" name="Converted" stroke="#10b981" strokeWidth={2} fill="url(#convertedGrad)" />
+              <Area type="monotone" dataKey="leads" name="Leads" stroke="#0e8ce9" strokeWidth={4} fill="url(#leadsGrad)" animationDuration={2000} />
+              <Area type="monotone" dataKey="converted" name="Converted" stroke="#10b981" strokeWidth={4} fill="url(#convertedGrad)" animationDuration={2000} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
         {/* Leads by Source */}
-        <div className="card p-5">
-          <h3 className="text-sm font-semibold text-slate-800 mb-1">Leads by Source</h3>
-          <p className="text-xs text-slate-400 mb-4">Distribution across channels</p>
-          <ResponsiveContainer width="100%" height={160}>
-            <PieChart>
-              <Pie data={leadsSourceData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value">
-                {leadsSourceData.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => [`${value}%`, 'Share']} contentStyle={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 12 }} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="space-y-1.5 mt-2">
+        <div className="card-premium p-7">
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-slate-900 tracking-tight">Lead Sources</h3>
+            <p className="text-sm font-medium text-slate-500 mt-1">Multi-channel distribution</p>
+          </div>
+          <div className="relative">
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie data={leadsSourceData} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={8} dataKey="value" stroke="none">
+                  {leadsSourceData.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} className="hover:opacity-80 transition-opacity cursor-pointer" />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [`${value}%`, 'Share']} contentStyle={{ background: '#fff', border: 'none', borderRadius: 12, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: 12, fontWeight: 600 }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+              <p className="text-2xl font-black text-slate-900">100%</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase">Coverage</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-8">
             {leadsSourceData.map((item) => (
-              <div key={item.name} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
+              <div key={item.name} className="flex flex-col p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
+                <div className="flex items-center gap-2 mb-1">
                   <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.color }}></span>
-                  <span className="text-slate-500">{item.name}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{item.name}</span>
                 </div>
-                <span className="text-slate-700 font-medium">{item.value}%</span>
+                <span className="text-sm font-bold text-slate-900">{item.value}%</span>
               </div>
             ))}
           </div>
@@ -147,32 +169,39 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sales Funnel */}
-        <div className="card p-5 col-span-2">
-          <div className="flex items-center justify-between mb-4">
+        <div className="card-premium p-7 col-span-2">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="text-sm font-semibold text-slate-800">Sales Funnel</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Lead journey from inquiry to booking</p>
+              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Sales Funnel</h3>
+              <p className="text-sm font-medium text-slate-500 mt-1">Lead conversion lifecycle efficiency</p>
             </div>
-            <Activity className="w-4 h-4 text-slate-400" />
+            <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center">
+              <Activity className="w-5 h-5 text-primary-500" />
+            </div>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-4">
             {salesFunnelData.map((item, idx) => {
               const maxCount = salesFunnelData[0].count;
               const width = (item.count / maxCount) * 100;
               return (
-                <div key={item.stage} className="flex items-center gap-3">
-                  <span className="text-xs text-slate-500 w-28 text-right flex-shrink-0">{item.stage}</span>
-                  <div className="flex-1 bg-slate-100 rounded-full h-7 overflow-hidden relative">
-                    <div
-                      className="h-full rounded-full flex items-center justify-end pr-3 transition-all duration-700"
-                      style={{ width: `${width}%`, background: item.color }}
-                    >
-                      <span className="text-xs font-semibold text-white drop-shadow-sm">{item.count}</span>
+                <div key={item.stage} className="animate-slide-up" style={{ animationDelay: `${idx * 100}ms` }}>
+                  <div className="flex items-center justify-between mb-2 px-1">
+                    <span className="text-xs font-bold text-slate-700">{item.stage}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-slate-900">{item.count}</span>
+                      <span className="text-[10px] font-bold text-slate-400">
+                        ({idx === 0 ? '100' : Math.round((item.count / salesFunnelData[0].count) * 100)}%)
+                      </span>
                     </div>
                   </div>
-                  <span className="text-xs text-slate-400 w-8 flex-shrink-0">{idx === 0 ? '100%' : `${Math.round((item.count / salesFunnelData[0].count) * 100)}%`}</span>
+                  <div className="h-4 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                    <div
+                      className="h-full rounded-full transition-all duration-1000 shadow-sm"
+                      style={{ width: `${width}%`, background: item.color }}
+                    ></div>
+                  </div>
                 </div>
               );
             })}
@@ -180,30 +209,37 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Leads */}
-        <div className="card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-slate-800">Recent Leads</h3>
-            <a href="/leads" className="text-xs text-primary-600 hover:text-primary-500 transition-colors">View all →</a>
+        <div className="card-premium p-7">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-slate-900 tracking-tight">Top Prospects</h3>
+            <button className="p-2 rounded-xl text-primary-600 hover:bg-primary-50 transition-colors">
+              <ArrowUpRight className="w-5 h-5" />
+            </button>
           </div>
-          <div className="space-y-3">
-            {recentLeads.map(lead => (
-              <div key={lead.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                  {lead.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+          <div className="space-y-4">
+            {recentLeads.map((lead, idx) => (
+              <div key={lead.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 transition-all duration-300 cursor-pointer group animate-fade-in" style={{ animationDelay: `${idx * 100}ms` }}>
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-premium flex items-center justify-center text-white text-sm font-black shadow-md group-hover:scale-110 transition-transform">
+                    {lead.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-700 truncate">{lead.name}</p>
-                  <p className="text-xs text-slate-400 truncate">{lead.propertyInterest} · {lead.source}</p>
+                  <p className="text-sm font-bold text-slate-900 truncate group-hover:text-primary-600 transition-colors">{lead.name}</p>
+                  <p className="text-[11px] font-medium text-slate-500 truncate mt-0.5">{lead.propertyInterest} · {lead.source}</p>
                 </div>
-                <span className={`badge ${
-                  lead.status === 'New Lead' ? 'badge-new' :
-                  lead.status === 'Contacted' ? 'badge-contacted' :
-                  lead.status === 'Interested' ? 'badge-interested' :
-                  lead.status === 'Booked' ? 'badge-booked' :
-                  lead.status === 'Lost' ? 'badge-lost' : 'badge-sitevisit'
-                } text-[10px]`}>
-                  {lead.status === 'Site Visit Scheduled' ? 'Visit' : lead.status}
-                </span>
+                <div className="flex flex-col items-end gap-1.5 font-sans">
+                  <span className={clsx('badge-new text-[8px] sm:text-[10px]', 
+                    lead.status === 'New Lead' ? 'badge-new' :
+                    lead.status === 'Contacted' ? 'badge-contacted' :
+                    lead.status === 'Interested' ? 'badge-interested' :
+                    lead.status === 'Booked' ? 'badge-booked' :
+                    lead.status === 'Lost' ? 'badge-lost' : 'badge-sitevisit'
+                  )}>
+                    {lead.status === 'Site Visit Scheduled' ? 'Visit' : lead.status}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
