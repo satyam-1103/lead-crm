@@ -1,18 +1,37 @@
-import { useState } from 'react';
-import { mockLinkedInProspects } from '../data/mockData';
+import { useEffect, useState } from 'react';
+import { firebaseService } from '../services/firebaseService';
 import type { LinkedInProspect } from '../types';
 import { Search, Plus, Building2, MapPin, Users, Mail, ExternalLink, CheckCircle2 } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function Discovery() {
   const [search, setSearch] = useState('');
+  const [prospects, setProspects] = useState<LinkedInProspect[]>([]);
+  const [loading, setLoading] = useState(true);
   const [addedIds, setAddedIds] = useState<string[]>([]);
 
-  const filtered = mockLinkedInProspects.filter((p: LinkedInProspect) => 
+  useEffect(() => {
+    const fetchProspects = async () => {
+      const fetched = await firebaseService.getProspects();
+      setProspects(fetched);
+      setLoading(false);
+    };
+    fetchProspects();
+  }, []);
+
+  const filtered = prospects.filter((p: LinkedInProspect) => 
     p.name.toLowerCase().includes(search.toLowerCase()) || 
     p.company.toLowerCase().includes(search.toLowerCase()) ||
     p.industry.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   const handleAddToCRM = (id: string) => {
     setAddedIds(prev => [...prev, id]);

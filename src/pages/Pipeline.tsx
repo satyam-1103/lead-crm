@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { mockLeads } from '../data/mockData';
+import { firebaseService } from '../services/firebaseService';
 import type { Lead, LeadStatus } from '../types';
 import { IndianRupee, Home, Phone } from 'lucide-react';
 import clsx from 'clsx';
@@ -29,17 +29,45 @@ const AGENT_COLORS: Record<string, string> = {
 };
 
 export default function Pipeline() {
-  const [leads, setLeads] = useState<Lead[]>(mockLeads);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = firebaseService.subscribeToLeads((fetchedLeads) => {
+      setLeads(fetchedLeads);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const getByStatus = (status: LeadStatus) => leads.filter(l => l.status === status);
 
-  const onDragEnd = (result: DropResult) => {
+  const onDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+    
     const newStatus = destination.droppableId as LeadStatus;
+    
+    // Optimistic update
     setLeads(prev => prev.map(l => l.id === draggableId ? { ...l, status: newStatus } : l));
+    
+    // Persist to Firebase
+    try {
+      await firebaseService.updateLeadStatus(draggableId, newStatus);
+    } catch (error) {
+      console.error('Failed to update lead status:', error);
+      // Revert if failed? (Optional for now)
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full">

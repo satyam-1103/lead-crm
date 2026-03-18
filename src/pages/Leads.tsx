@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { mockLeads } from '../data/mockData';
+import { useEffect, useState } from 'react';
+import { firebaseService } from '../services/firebaseService';
 import type { Lead, LeadStatus } from '../types';
 import {
   Search, Filter, Edit2, User, Phone, Mail,
@@ -135,13 +135,24 @@ function LeadModal({ lead, onClose, onStatusChange }: LeadModalProps) {
 }
 
 export default function Leads() {
-  const [leads, setLeads] = useState<Lead[]>(mockLeads);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<LeadStatus | 'All'>('All');
   const [sourceFilter, setSourceFilter] = useState('All');
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 8;
+
+  useEffect(() => {
+    // We can use subscribeToLeads for real-time updates
+    const unsubscribe = firebaseService.subscribeToLeads((fetchedLeads) => {
+      setLeads(fetchedLeads);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const filtered = leads.filter(l => {
     const matchSearch = l.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -155,9 +166,21 @@ export default function Leads() {
   const totalPages = Math.ceil(filtered.length / perPage);
   const paged = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
 
-  const handleStatusChange = (id: string, status: LeadStatus) => {
-    setLeads(prev => prev.map(l => l.id === id ? { ...l, status } : l));
+  const handleStatusChange = async (id: string, status: LeadStatus) => {
+    try {
+      await firebaseService.updateLeadStatus(id, status);
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

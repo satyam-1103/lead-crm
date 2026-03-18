@@ -1,4 +1,7 @@
-import { mockLeads, weeklyLeadData, salesFunnelData, leadsSourceData, monthlyRevenueData } from '../data/mockData';
+import { useEffect, useState } from 'react';
+import { firebaseService } from '../services/firebaseService';
+import type { Lead } from '../types';
+import { weeklyLeadData, salesFunnelData, leadsSourceData, monthlyRevenueData } from '../data/mockData';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
@@ -20,10 +23,30 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function Reports() {
-  const totalRevenue = 1450; // Lakhs
-  const totalBookings = mockLeads.filter(l => l.status === 'Booked').length;
-  const totalLeads = mockLeads.length;
-  const avgDealSize = Math.round(totalRevenue / totalBookings);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLeads = async () => {
+      const fetched = await firebaseService.getLeads();
+      setLeads(fetched);
+      setLoading(false);
+    };
+    fetchLeads();
+  }, []);
+
+  const totalRevenue = 1450; // Lakhs (Keep static for now or calculate if revenue field exists)
+  const totalBookings = leads.filter(l => l.status === 'Booked').length;
+  const totalLeads = leads.length;
+  const avgDealSize = totalBookings > 0 ? Math.round(totalRevenue / totalBookings) : 0;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
