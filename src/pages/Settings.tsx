@@ -39,107 +39,117 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex gap-6" style={{ minHeight: 'calc(100vh - 140px)' }}>
+    <div className="flex flex-col lg:flex-row gap-8 animate-slide-up" style={{ minHeight: 'calc(100vh - 140px)' }}>
       {/* Settings Navigation */}
-      <div className="w-56 flex-shrink-0">
-        <div className="card p-2 space-y-1">
+      <div className="w-full lg:w-72 flex-shrink-0">
+        <div className="card-premium p-3 space-y-2 bg-white/80 backdrop-blur-md border-none shadow-soft-xl">
+          <div className="px-4 py-3 mb-2">
+            <p className="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em]">Workspace Config</p>
+          </div>
           {SECTIONS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveSection(id)}
               className={clsx(
-                'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200',
+                'w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all duration-300',
                 activeSection === id 
-                  ? 'bg-primary-50 text-primary-700 border border-primary-100 shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                  ? 'bg-slate-900 text-white shadow-lg shadow-slate-200 translate-x-1' 
+                  : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'
               )}
             >
-              <Icon className="w-4.5 h-4.5 flex-shrink-0" />
+              <Icon className="w-5 h-5 flex-shrink-0" />
               {label}
-              <ChevronRight className={clsx('w-3.5 h-3.5 ml-auto opacity-0 transition-opacity', activeSection === id && 'opacity-100')} />
+              <ChevronRight className={clsx('w-4 h-4 ml-auto opacity-0 transition-all', activeSection === id && 'opacity-100 translate-x-1')} />
             </button>
           ))}
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 space-y-5">
+      <div className="flex-1 space-y-6">
         {activeSection === 'general' && (
-          <div className="card p-8 animate-fade-in">
-            <h3 className="text-lg font-bold text-slate-800 mb-6">General Workspace Settings</h3>
+          <div className="card-premium p-10 animate-fade-in border-none shadow-soft-2xl bg-white">
+            <div className="mb-10">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">General Workspace Settings</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">Core Identity & Operations</p>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 mb-12">
               {[
                 { label: 'Company Name', value: 'LeadEstate Realty Pvt. Ltd.', type: 'text' },
                 { label: 'Primary Contact Email', value: 'admin@leadestate.in', type: 'email' },
                 { label: 'Support Hotline', value: '+91 99999 00000', type: 'tel' },
                 { label: 'Headquarters', value: 'Bangalore, Karnataka', type: 'text' },
               ].map(field => (
-                <div key={field.label}>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 whitespace-nowrap">{field.label}</label>
-                  <input type={field.type} defaultValue={field.value} className="input-field w-full h-11" />
+                <div key={field.label} className="group">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 group-focus-within:text-primary-600 transition-colors">{field.label}</label>
+                  <input type={field.type} defaultValue={field.value} className="input-field w-full h-14 bg-slate-50 border-slate-100 hover:bg-white focus:bg-white transition-all font-bold px-5 text-sm" />
                 </div>
               ))}
             </div>
 
-            <div className="space-y-6 max-w-lg">
+            <div className="space-y-8 max-w-xl">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Automated Lead Distribution</label>
-                <select className="select-field w-full h-11">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Automated Lead Distribution</label>
+                <select className="select-field w-full h-14 bg-slate-50 border-slate-100 hover:bg-white focus:bg-white transition-all font-bold px-5 text-sm uppercase tracking-widest">
                   <option>Round Robin (Sequential assignment)</option>
                   <option>Capacity Based (Assign to least busy agent)</option>
                   <option>Performance Based (Higher conversion priority)</option>
                   <option>Manual Override Only</option>
                 </select>
-                <p className="text-[11px] text-slate-400 mt-2 italic">New leads will be assigned based on this logic across the team.</p>
+                <p className="text-[10px] font-bold text-slate-400 mt-3 italic">New leads will be assigned based on this logic across the team.</p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">SLA Inactivity Threshold (Hours)</label>
-                <div className="flex items-center gap-3">
-                  <input type="number" defaultValue="2" className="input-field w-24 h-11 text-center font-bold" />
-                  <span className="text-sm text-slate-500 font-medium font-serif">Hours until alert is triggered</span>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">SLA Inactivity Threshold (Hours)</label>
+                <div className="flex items-center gap-5">
+                  <input type="number" defaultValue="2" className="input-field w-28 h-14 text-center font-black text-lg bg-slate-50" />
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-loose">Hours until automated<br/>alert is triggered</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-8 border-t border-slate-100 mt-10">
+            <div className="pt-10 border-t border-slate-50 mt-12">
               <button 
                 onClick={handleSave} 
                 className={clsx(
-                  'btn-primary h-11 px-8 min-w-[160px]', 
-                  saved && 'from-emerald-600 to-emerald-500 hover:from-emerald-500 shadow-emerald-200'
+                  'h-14 px-10 min-w-[200px] rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-lg active:scale-95', 
+                  saved 
+                    ? 'bg-emerald-600 text-white shadow-emerald-200' 
+                    : 'bg-primary-600 text-white shadow-primary-100 hover:bg-primary-500'
                 )}
               >
-                {saved ? <><Check className="w-4 h-4" /> Changes Saved</> : 'Update Settings'}
+                {saved ? <><Check className="w-4 h-4 inline mr-2" /> Saved Success</> : 'Update Settings'}
               </button>
             </div>
           </div>
         )}
 
         {activeSection === 'notifications' && (
-          <div className="card p-8 animate-fade-in shadow-lg">
-            <h3 className="text-lg font-bold text-slate-800 mb-2">Notification Center</h3>
-            <p className="text-xs text-slate-400 mb-8 font-medium">Configure how and when you want to be alerted across all platforms.</p>
+          <div className="card-premium p-10 animate-fade-in border-none shadow-soft-2xl bg-white">
+            <div className="mb-10">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">Notification Center</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">Omnichannel Alert Management</p>
+            </div>
             
-            <div className="divide-y divide-slate-100">
+            <div className="space-y-2">
               {notifications.map(notif => (
-                <div key={notif.id} className="py-5 flex items-center justify-between gap-6 first:pt-0">
+                <div key={notif.id} className="py-6 flex items-center justify-between gap-8 border-b border-slate-50 last:border-none group">
                   <div className="max-w-md">
-                    <p className="text-sm font-bold text-slate-700">{notif.label}</p>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{notif.desc}</p>
+                    <p className="text-sm font-black text-slate-800 group-hover:text-primary-600 transition-colors">{notif.label}</p>
+                    <p className="text-[11px] font-bold text-slate-400 mt-1.5 leading-relaxed uppercase tracking-wider">{notif.desc}</p>
                   </div>
                   <button
                     onClick={() => setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, enabled: !n.enabled } : n))}
                     className={clsx(
-                      'relative w-12 h-6.5 rounded-full transition-all duration-300 flex-shrink-0 shadow-inner', 
+                      'relative w-14 h-8 rounded-full transition-all duration-500 flex-shrink-0 shadow-inner p-1', 
                       notif.enabled ? 'bg-primary-600' : 'bg-slate-200'
                     )}
                   >
                     <span 
                       className={clsx(
-                        'absolute top-1 w-4.5 h-4.5 rounded-full bg-white shadow-md border border-slate-100 transition-all duration-300', 
-                        notif.enabled ? 'left-6.5' : 'left-1'
+                        'block w-6 h-6 rounded-full bg-white shadow-lg transition-all duration-500 transform', 
+                        notif.enabled ? 'translate-x-6' : 'translate-x-0'
                       )} 
                     />
                   </button>
@@ -150,29 +160,33 @@ export default function Settings() {
         )}
 
         {activeSection === 'integrations' && (
-          <div className="card p-8 animate-fade-in">
-            <h3 className="text-lg font-bold text-slate-800 mb-1">External Integrations</h3>
-            <p className="text-xs text-slate-400 mb-8">Connect your CRM pipeline with best-in-class real estate platforms.</p>
+          <div className="card-premium p-10 animate-fade-in border-none shadow-soft-2xl bg-white">
+            <div className="mb-10">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">External Ecosystem</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">Enterprise-grade Platform Bridges</p>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {INTEGRATIONS.map(integ => (
-                <div key={integ.name} className={clsx('border rounded-2xl p-5 flex items-start gap-4 transition-all hover:scale-[1.01]', integ.color)}>
-                  <span className="text-3xl bg-white/50 w-12 h-12 rounded-xl flex items-center justify-center shadow-sm border border-slate-100/50">{integ.icon}</span>
+                <div key={integ.name} className={clsx('border-2 rounded-[24px] p-6 flex items-start gap-5 transition-all hover:scale-[1.02] bg-white group', integ.connected ? 'border-primary-100' : 'border-slate-50')}>
+                  <span className="text-3xl bg-slate-50 w-16 h-16 rounded-2xl flex items-center justify-center shadow-soft-md border border-white group-hover:rotate-6 transition-transform">{integ.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-bold truncate">{integ.name}</p>
-                      {integ.connected && <span className="bg-white/80 border border-current text-[9px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded shadow-sm">Syncing</span>}
+                    <div className="flex items-center gap-3 mb-2">
+                      <p className="text-sm font-black text-slate-900">{integ.name}</p>
+                      {integ.connected && <span className="bg-emerald-50 text-emerald-600 text-[8px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full border border-emerald-100">Live</span>}
                     </div>
-                    <p className="text-xs opacity-70 leading-relaxed truncate">{integ.desc}</p>
+                    <p className="text-[10px] font-bold text-slate-400 leading-relaxed uppercase tracking-wider">{integ.desc}</p>
+                    <button 
+                      className={clsx(
+                        'mt-5 h-9 px-5 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 transition-all active:scale-95',
+                        integ.connected 
+                          ? 'border-rose-100 text-rose-500 hover:bg-rose-50 hover:border-rose-200' 
+                          : 'border-slate-100 text-slate-400 hover:border-primary-600 hover:text-primary-600 hover:bg-primary-50'
+                      )}
+                    >
+                      {integ.connected ? 'Disconnect' : 'Integrate'}
+                    </button>
                   </div>
-                  <button 
-                    className={clsx(
-                      'text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border-2 transition-all mt-1',
-                      integ.connected ? 'border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300' : 'border-current opacity-80 hover:opacity-100 hover:bg-white/40'
-                    )}
-                  >
-                    {integ.connected ? 'Halt' : 'Link'}
-                  </button>
                 </div>
               ))}
             </div>
@@ -180,15 +194,20 @@ export default function Settings() {
         )}
 
         {(activeSection === 'team' || activeSection === 'security' || activeSection === 'appearance') && (
-          <div className="card p-20 text-center animate-fade-in bg-slate-50 shadow-inner">
-            <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mx-auto mb-6">
-              <Settings2 className="w-8 h-8 text-primary-300 animate-pulse" />
+          <div className="card-premium p-20 text-center animate-fade-in bg-slate-900 border-none shadow-soft-2xl relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-transparent opacity-50"></div>
+            <div className="relative z-10">
+              <div className="w-20 h-20 bg-white/10 rounded-2xl shadow-xl backdrop-blur-md flex items-center justify-center mx-auto mb-8 border border-white/20 group-hover:scale-110 transition-transform duration-500">
+                <Settings2 className="w-10 h-10 text-primary-400 animate-pulse" />
+              </div>
+              <p className="text-white font-black text-2xl mb-3 tracking-tight">Enterprise Expansion Locked</p>
+              <p className="text-xs font-bold text-primary-300 max-w-xs mx-auto leading-relaxed uppercase tracking-widest opacity-70">
+                This core configuration cluster is reserved for high-volume enterprise deployments.
+              </p>
+              <button className="h-12 px-8 bg-white/10 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl mx-auto mt-10 border border-white/20 hover:bg-white/20 transition-all">
+                REQUEST ASCENSION ACCESS
+              </button>
             </div>
-            <p className="text-slate-700 font-bold text-lg mb-2">Expansion Module Locked</p>
-            <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
-              This advanced configuration module will be available in the next system update for your workspace plan.
-            </p>
-            <button className="btn-secondary text-xs mx-auto mt-6 border-slate-300">Learn More About {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}</button>
           </div>
         )}
       </div>
