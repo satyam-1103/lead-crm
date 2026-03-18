@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
+
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Leads from './pages/Leads';
@@ -8,8 +10,19 @@ import Discovery from './pages/Discovery';
 import Team from './pages/Team';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
 
 export default function App() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="*" element={<Login />} />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
