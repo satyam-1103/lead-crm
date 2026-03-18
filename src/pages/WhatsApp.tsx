@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { mockWhatsAppConversations } from '../data/mockData';
+import { useEffect, useState } from 'react';
+import { firebaseService } from '../services/firebaseService';
 import type { WhatsAppConversation, ChatMessage } from '../types';
 import { MessageCircle, Send, Bot, Zap, Phone, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
@@ -116,9 +116,30 @@ function ChatView({ conversation }: { conversation: WhatsAppConversation }) {
 
 export default function WhatsApp() {
   const [tab, setTab] = useState<'conversations' | 'automation' | 'flow'>('conversations');
-  const [selectedConv, setSelectedConv] = useState(mockWhatsAppConversations[0].id);
+  const [conversations, setConversations] = useState<WhatsAppConversation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedConvId, setSelectedConvId] = useState<string | null>(null);
   const [templates, setTemplates] = useState(AUTOMATION_TEMPLATES);
-  const selected = mockWhatsAppConversations.find(c => c.id === selectedConv)!;
+
+  useEffect(() => {
+    const fetchConvs = async () => {
+      const fetched = await firebaseService.getConversations();
+      setConversations(fetched);
+      if (fetched.length > 0) setSelectedConvId(fetched[0].id);
+      setLoading(false);
+    };
+    fetchConvs();
+  }, []);
+
+  const selected = conversations.find(c => c.id === selectedConvId);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -143,8 +164,8 @@ export default function WhatsApp() {
       {tab === 'conversations' && (
         <div className="card overflow-hidden" style={{ height: '65vh' }}>
           <div className="grid grid-cols-3 h-full divide-x divide-slate-100">
-            <div className="col-span-1 overflow-hidden"><ConversationList conversations={mockWhatsAppConversations} selected={selectedConv} onSelect={setSelectedConv} /></div>
-            <div className="col-span-2 overflow-hidden">{selected ? <ChatView conversation={selected} /> : <div className="flex items-center justify-center h-full text-slate-400 text-sm">Select a conversation</div>}</div>
+            <div className="col-span-1 overflow-hidden"><ConversationList conversations={conversations} selected={selectedConvId || ''} onSelect={setSelectedConvId} /></div>
+            <div className="col-span-2 overflow-hidden">{selected ? <ChatView key={selected.id} conversation={selected} /> : <div className="flex items-center justify-center h-full text-slate-400 text-sm">Select a conversation</div>}</div>
           </div>
         </div>
       )}

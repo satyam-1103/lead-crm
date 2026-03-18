@@ -2,17 +2,11 @@ import {
   AreaChart, Area, PieChart, Pie, Cell, Tooltip,
   ResponsiveContainer, XAxis, YAxis, CartesianGrid
 } from 'recharts';
-import { Users, UserCheck, TrendingUp, MapPin, CheckCircle, Percent, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
-import { mockLeads, leadsSourceData, salesFunnelData, weeklyLeadData } from '../data/mockData';
-
-const stats = [
-  { label: 'Total Leads', value: '248', change: '+18%', up: true, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50 border border-blue-100' },
-  { label: 'Leads Assigned', value: '197', change: '+12%', up: true, icon: UserCheck, color: 'text-purple-600', bg: 'bg-purple-50 border border-purple-100' },
-  { label: 'Qualified Leads', value: '124', change: '+9%', up: true, icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50 border border-indigo-100' },
-  { label: 'Site Visits Scheduled', value: '68', change: '+22%', up: true, icon: MapPin, color: 'text-amber-600', bg: 'bg-amber-50 border border-amber-100' },
-  { label: 'Bookings Closed', value: '18', change: '-3%', up: false, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50 border border-emerald-100' },
-  { label: 'Conversion Rate', value: '7.3%', change: '+1.2%', up: true, icon: Percent, color: 'text-pink-600', bg: 'bg-pink-50 border border-pink-100' },
-];
+import { Users, TrendingUp, MapPin, CheckCircle, Percent, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { firebaseService } from '../services/firebaseService';
+import type { Lead } from '../types';
+import { leadsSourceData, salesFunnelData, weeklyLeadData } from '../data/mockData';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -31,13 +25,47 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function Dashboard() {
-  const recentLeads = mockLeads.slice(0, 5);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = firebaseService.subscribeToLeads((fetchedLeads) => {
+      setLeads(fetchedLeads);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const recentLeads = leads.slice(0, 5);
+  
+  // Calculate dynamic stats from leads
+  const totalLeads = leads.length;
+  const qualifiedLeads = leads.filter(l => l.status === 'Interested' || l.status === 'Negotiation' || l.status === 'Booked').length;
+  const siteVisits = leads.filter(l => l.status === 'Site Visit Scheduled').length;
+  const bookings = leads.filter(l => l.status === 'Booked').length;
+  const conversionRate = totalLeads > 0 ? ((bookings / totalLeads) * 100).toFixed(1) : '0';
+
+  const dynamicStats = [
+    { label: 'Total Leads', value: totalLeads.toString(), change: '+18%', up: true, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50 border border-blue-100' },
+    { label: 'Qualified Leads', value: qualifiedLeads.toString(), change: '+9%', up: true, icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50 border border-indigo-100' },
+    { label: 'Site Visits', value: siteVisits.toString(), change: '+22%', up: true, icon: MapPin, color: 'text-amber-600', bg: 'bg-amber-50 border border-amber-100' },
+    { label: 'Bookings', value: bookings.toString(), change: '-3%', up: false, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50 border border-emerald-100' },
+    { label: 'Conversion Rate', value: `${conversionRate}%`, change: '+1.2%', up: true, icon: Percent, color: 'text-pink-600', bg: 'bg-pink-50 border border-pink-100' },
+    { label: 'Avg Response', value: '28 min', change: '+5%', up: true, icon: Activity, color: 'text-slate-600', bg: 'bg-slate-50 border border-slate-100' },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* KPI Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {stats.map(({ label, value, change, up, icon: Icon, color, bg }) => (
+        {dynamicStats.map(({ label, value, change, up, icon: Icon, color, bg }) => (
           <div key={label} className="stat-card col-span-1">
             <div className="flex items-start justify-between mb-3">
               <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center`}>

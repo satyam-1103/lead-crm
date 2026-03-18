@@ -1,4 +1,7 @@
-import { mockAgents, monthlyRevenueData } from '../data/mockData';
+import { useEffect, useState } from 'react';
+import { firebaseService } from '../services/firebaseService';
+import type { Agent } from '../types';
+import { monthlyRevenueData } from '../data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { TrendingUp, Clock, Target, Award } from 'lucide-react';
 import clsx from 'clsx';
@@ -25,23 +28,43 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const agentChartData = mockAgents.map(a => ({
-  name: a.name.split(' ')[0],
-  Leads: a.leadsAssigned,
-  'Site Visits': a.siteVisits,
-  Bookings: a.bookings,
-}));
-
 export default function Team() {
-  const sorted = [...mockAgents].sort((a, b) => b.bookings - a.bookings);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      const fetchedAgents = await firebaseService.getAgents();
+      setAgents(fetchedAgents);
+      setLoading(false);
+    };
+    fetchAgents();
+  }, []);
+
+  const sorted = [...agents].sort((a, b) => b.bookings - a.bookings);
+
+  const agentChartData = agents.map(a => ({
+    name: a.name.split(' ')[0],
+    Leads: a.leadsAssigned,
+    'Site Visits': a.siteVisits,
+    Bookings: a.bookings,
+  }));
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Bookings', value: mockAgents.reduce((s, a) => s + a.bookings, 0), icon: Award, color: 'text-emerald-600', bg: 'bg-emerald-50 border border-emerald-100' },
-          { label: 'Total Site Visits', value: mockAgents.reduce((s, a) => s + a.siteVisits, 0), icon: Target, color: 'text-blue-600', bg: 'bg-blue-50 border border-blue-100' },
-          { label: 'Avg Conversion Rate', value: `${(mockAgents.reduce((s, a) => s + a.conversionRate, 0) / mockAgents.length).toFixed(1)}%`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50 border border-purple-100' },
+          { label: 'Total Bookings', value: agents.reduce((s, a) => s + a.bookings, 0), icon: Award, color: 'text-emerald-600', bg: 'bg-emerald-50 border border-emerald-100' },
+          { label: 'Total Site Visits', value: agents.reduce((s, a) => s + a.siteVisits, 0), icon: Target, color: 'text-blue-600', bg: 'bg-blue-50 border border-blue-100' },
+          { label: 'Avg Conversion Rate', value: `${agents.length > 0 ? (agents.reduce((s, a) => s + a.conversionRate, 0) / agents.length).toFixed(1) : 0}%`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50 border border-purple-100' },
           { label: 'Avg Response Time', value: '33 min', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50 border border-amber-100' },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="stat-card">
